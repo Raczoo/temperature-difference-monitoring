@@ -1,0 +1,47 @@
+    
+sensor:
+  # Sensor 1: REST Sensor
+  - platform: rest
+    resource: "http://10.10.0.94:80" # Endpoint from which the sensor will fetch data.
+    name: pico_w_report # Name given to this sensor
+    json_attributes: # Sensor expects JSON attributes named "hum", "temp", "hum2", and "temp2" from the REST resource
+      - hum
+      - temp
+      - hum2
+      - temp2
+    value_template: "{{ value_json }}" # Value of the sensor will be the entire JSON object received from the REST resource
+    scan_interval: 30 # Sensor will be updated every 30 seconds
+
+  - platform: template
+    sensors: # Platform allows the creation of template sensors based on other sensors' attributes
+      # Sensor 2: Template Sensor - Temperature
+      picotemp:
+        friendly_name: "temp pico" # Sensor has a friendly name for identification purposes
+        value_template: "{{ state_attr('sensor.pico_w_report', 'temp')}}" # Value of each sensor is derived from the respective attribute of the "pico_w_report" sensor
+        unit_of_measurement: "°C" # Sensor has a specific unit of measurement associated with it (e.g., temperature in °C, humidity in %)
+        device_class: temperature # Sensor is assigned a device class to specify the type of data it represents (e.g., temperature, humidity)
+      # Sensor 3: Template Sensor - Humidity
+      picohum:
+        friendly_name: "Test Humidity"
+        value_template: "{{ state_attr('sensor.pico_w_report', 'hum')}}"
+        unit_of_measurement: "%"
+        device_class: humidity
+      # Sensor 4: Template Sensor - Temperature 2
+      picotemp2:
+        friendly_name: "temp pico2"
+        value_template: "{{ state_attr('sensor.pico_w_report', 'temp2')}}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+      # Sensor 5: Template Sensor - Humidity 2
+      picohum2:
+        friendly_name: "Humidity pico2"
+        value_template: "{{ state_attr('sensor.pico_w_report', 'hum2')}}"
+        unit_of_measurement: "%"
+        device_class: humidity
+      # Sensor 6: Template Sensor - Temperature Difference
+      picodifference:
+        friendly_name: "temp difference"
+        #Value of sensor 2 minus value of sensor 4 to get difference 
+        value_template: "{{ ((states('sensor.picotemp') | int) - (states('sensor.picotemp2') | int)) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
